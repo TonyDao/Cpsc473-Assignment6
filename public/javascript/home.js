@@ -1,15 +1,17 @@
+/* jshint browser: true, jquery: true, camelcase: true, indent: 2, undef: true, quotmark: single, maxlen: 80, trailing: true, curly: true, eqeqeq: true, forin: true, immed: true, latedef: true, newcap: true, nonew: true, unused: true, strict: true */
+
 var socket = io.connect('http://localhost:8080');
 
 var main = function() {
     'use strict';
 
-    //knockout js 
+    //knockout viewmodel
     var vm = {
-        username: ko.observable(""),
-        question: ko.observable(""),
-        answer: ko.observable(""),
-        createQuestion: ko.observable(""),
-        createAnswer: ko.observable(""),
+        username: ko.observable(''),
+        question: ko.observable(''),
+        answer: ko.observable(''),
+        createQuestion: ko.observable(''),
+        createAnswer: ko.observable(''),
         rightPoint: ko.observable(0),
         wrongPoint: ko.observable(0),
         playerList: ko.observableArray(),
@@ -45,7 +47,7 @@ var main = function() {
     //enable tab selection
     var previousTab = $('.ui.tab.active.segment');
     $('.vertical.pointing.menu .item').tab({
-        'onLoad': function(e){
+        'onLoad': function(){
             var currentTab = $('.ui.tab.active.segment');
             //hide current and show prevous to allow animate
             currentTab.hide();
@@ -68,11 +70,9 @@ var main = function() {
     //get next question
     $('#getQuestionButton').on('click', function() {
         //prevent form to reload page
-        $('.ui.form.answer').form({
-            onSuccess: function() {
-                return false;
-            }
-        });        
+        $('.ui.form.answer').submit(function(e) {
+            e.preventDefault();
+        });      
 
         //send request for new quetsion
         socket.emit('get question');
@@ -94,6 +94,7 @@ var main = function() {
                 }
             }, 
             onSuccess: function(){
+                //send answer to socket IO
                 var jsonData = {answer: vm.answer(), answerId: answerId};
                 socket.emit('answer', jsonData);
 
