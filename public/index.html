@@ -14,14 +14,14 @@
                         <div class="ui stacked segment">
                             <h1 class="ui header">Login to Trivia Question</h1>
                             <div class="field">
-                                <input type="text" name="username" placeholder="Username" id="username">
+                                <input type="text" name="username" placeholder="Username" id="username" data-bind="value: username">
                             </div>
                             <div class="ui fluid large blue submit button" id="loginButton">Login</div>
                         </div>
                     </form>
                 </div>
                 <div class="ui segment" id="game-form">
-                    <h2 class="ui header center aligned grid">Welcome <span></span></h2>
+                    <h2 class="ui header center aligned grid">Welcome <span data-bind="text: username"></span></h2>
                     <div class="ui two column grid">
                         <div class="four wide column">
                             <div class="ui vertical pointing menu">
@@ -47,8 +47,8 @@
 
                             <div class="ui segment">
                                 <h3 class="ui header">Player List:</h3>
-                                <div class="ui list" id="usersList">
-                                    
+                                <div class="ui list" id="usersList" data-bind="foreach: playerList">
+                                    <div class="item" data-bind="text: $data"></div>
                                 </div>
                             </div>
                         </div>
@@ -57,13 +57,13 @@
                                 <form class="ui huge form answer">
                                     <div class="field">
                                         <label>Question</label>
-                                        <div id="question" class="ui segment">
+                                        <div id="question" class="ui segment" data-bind="text: question">
                                             <span></span>
                                         </div>
                                     </div>
                                     <div class="field">
                                         <label>Answer</label>
-                                        <input type="text" name="answer" id="answer" placeholder="Answer">
+                                        <input type="text" name="answer" id="answer" placeholder="Answer" data-bind="value: answer">
                                     </div>
                                     <button class="ui primary button" id="answerButton" type="submit">Submit</button>
                                     <button class="ui button" type="submit" id="getQuestionButton">Start New Round</button>
@@ -74,32 +74,38 @@
                                 <form class="ui huge form question">
                                     <div class="field">
                                         <label>Question</label>
-                                        <input type="text" name="question" id="createQuestion" placeholder="Question">
+                                        <input type="text" name="question" id="createQuestion" placeholder="Question" data-bind="value: createQuestion">
                                     </div>
                                     <div class="field">
                                         <label>Answer</label>
-                                        <input type="text" name="answer" id="createAnswer" placeholder="Answer">
+                                        <input type="text" name="answer" id="createAnswer" placeholder="Answer" data-bind="value: createAnswer">
                                     </div>
                                     <button class="ui primary button" type="submit">Submit</button>
                                 </form>
                             </div>
                             <div class="ui tab segment" data-tab="score">
                                 <h2 class="ui header center aligned grid">Score</h2>
-                                <h3 class="ui header" id="right">Right: <span>0</span> </h3>
-                                <h3 class="ui header" id="wrong">Wrong: <span>0</span> </h3>
+                                <h3 class="ui header" id="right">Right: <span data-bind="text: rightPoint">0</span> </h3>
+                                <h3 class="ui header" id="wrong">Wrong: <span data-bind="text: wrongPoint">0</span> </h3>
                             </div>
                             <div id="displayAnswer">
-                                
+                                <div class="ui segment" data-bind="foreach: displayAnswer">
+                                    <h3 class="ui header">
+                                        <span data-bind="text: $data.player"></span> answered: 
+                                        <span class="ui header" data-bind="text: $data.answer, attr: {'class': $data.class}"></span>
+                                    </h3>
+                                </div>
                             </div>
                         </div>
                     </div> 
                 </div>               
             </div>
         </div>
+        <script type='text/javascript' src='javascript/knockout-3.4.1.js'></script>
 
         <script src="http://localhost:8080/socket.io/socket.io.js"></script>
         <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-        <script src="semantic/dist/semantic.min.js"></script>   
+        <script src="semantic/dist/semantic.min.js"></script> 
         <script src="javascript/home.js"></script>
     </body>
 </html>

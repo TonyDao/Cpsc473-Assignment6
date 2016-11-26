@@ -3,21 +3,36 @@ var socket = io.connect('http://localhost:8080');
 var main = function() {
     'use strict';
 
+    //knockout js 
+    var vm = {
+        username: ko.observable(""),
+        question: ko.observable(""),
+        answer: ko.observable(""),
+        createQuestion: ko.observable(""),
+        createAnswer: ko.observable(""),
+        rightPoint: ko.observable(0),
+        wrongPoint: ko.observable(0),
+        playerList: ko.observableArray(),
+        displayAnswer: ko.observableArray()
+    };
+
+    ko.applyBindings(vm);
+
     //check player enter username
     $('#loginButton').on('click', function(e) {
         e.preventDefault();
-        var username = $('#username').val();
-        if(username !== '') {
+
+        //check if user enter username
+        if(vm.username() !== '') {
             //disable login-form
             $('#login-form').transition({
                 animation: 'fade up',
                 onComplete: function() {
                     //show trivia question game
                     $('#game-form').transition('fade down');
-                    //display username on header
-                    $('#game-form h2 span').html(username);
+
                     //send new user have connected
-                    socket.emit('new user', {username: username});
+                    socket.emit('new user', {username: vm.username()});
                     //get score
                     socket.emit('score');
                 }
@@ -25,7 +40,7 @@ var main = function() {
         }
     });
 
-    var answerId = 1;
+    var answerId = 0;
 
     //enable tab selection
     var previousTab = $('.ui.tab.active.segment');
@@ -57,7 +72,7 @@ var main = function() {
             onSuccess: function() {
                 return false;
             }
-        });
+        });        
 
         //send request for new quetsion
         socket.emit('get question');
@@ -79,16 +94,11 @@ var main = function() {
                 }
             }, 
             onSuccess: function(){
-                var answer = $('#answer').val();
-                var result;
-
-                var jsonData = {answer: answer, answerId: answerId};
-                console.log(jsonData);
+                var jsonData = {answer: vm.answer(), answerId: answerId};
                 socket.emit('answer', jsonData);
-                
 
-                //remove question and answer
-                $('#answer').val('');
+                //empty answer
+                vm.answer('');
                 return false;
             }
         });
@@ -118,13 +128,11 @@ var main = function() {
             }
         }, 
         onSuccess: function(){
-            var question = $('#createQuestion').val(),
-                answer = $('#createAnswer').val();
-				jsonObj = {'question': question, 'answer': answer};
-
-            var jsonData = JSON.stringify(jsonObj);
-
-            console.log(jsonData);
+            //json data
+            var jsonData = JSON.stringify({
+                            'question': vm.createQuestion(),
+                            'answer': vm.createAnswer()
+                        });
             
             $.ajax({
                 url     : '/question',
@@ -141,8 +149,8 @@ var main = function() {
             });
             
             //remove question and answer
-            $('#createQuestion').val('');
-            $('#createAnswer').val('');
+            vm.createQuestion('');
+            vm.createAnswer('');
             return false;
         }
     });
@@ -153,64 +161,53 @@ var main = function() {
         socket.emit('score');
     });
 
-        //update new user logined in
-        socket.on('get users', function(data){
-            var user;
-            console.log(data);
+    //update new user logined in
+    socket.on('get users', function(data){        
+        //empty player list
+        vm.playerList([]);
 
-            //remove list
-            $('#usersList').empty();
+        //display retrieved player list from socket IO
+        for(var i=0; i<data.length; i++) {
+            vm.playerList.push(data[i].username);
+        }
+    });
 
-            //add new users list
-            for(var i=0; i<data.length; i++) {
-                user = $('<div class="item">' + data[i].username + '</div>');
-                $('#usersList').append(user);
-            }
-        });
+    //update new question
+    socket.on('new question', function(data) {
 
-        //update new question
-        socket.on('new question', function(data) {
-            console.log(data);
-            if(data) {
-                $('#question span').html(data.question);
-                answerId = data.answerId;
-            } else {
-                $('#question span').html('No question on DB');
-            } 
-        });
+        //empty last round answer
+        vm.displayAnswer([]);
 
-        //display user answers
-        socket.on('check answer', function(data) {
-            console.log(data);
+        if(data) {
+            vm.question(data.question);
+            answerId = data.answerId;
+        } else {
+            vm.question('No question on DB');
+        } 
+    });
 
-            var currentAnswer = $('<div class="ui segment">');
+    //display user answers
+    socket.on('check answer', function(data) {
+        var obj = {player: data.answerer, answer: '', class: ''};
 
-            var content = '<h3 class="ui header">' + data.answerer + ' answered: ';
+        if(data.correct === true) {
+            obj.answer = 'Correct';
+            obj.class = 'ui green header';
+        } else {
+            obj.answer = 'Incorrect';
+            obj.class = 'ui red header';
+        }
 
-            console.log(data.correct);
-            if(data.correct === true) {
-                content += '<span class="ui green header">Correct</span></h3>';
-            } else {
-                content += '<span class="ui red header">Incorrect</span></h3>';
-            }
-            content += '</div>';
-            currentAnswer.append(content);
+        //display player answer
+        vm.displayAnswer.push(obj);
+    });
 
-            $('#displayAnswer').append(currentAnswer);
-            currentAnswer.hide();
-            currentAnswer.fadeIn();
-        });        
-
-        //update score
-        socket.on('update score', function(data){
-            console.log(data);
-            console.log(data.right);
-            $('#right span').html(data.right);
-            $('#wrong span').html(data.wrong);
-        });
-
-
-    
+    //update score
+    socket.on('update score', function(data){
+        //display player right and wrong score
+        vm.rightPoint(data.right);
+        vm.wrongPoint(data.wrong);
+    });
 };
 
 
