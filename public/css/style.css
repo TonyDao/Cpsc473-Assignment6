@@ -1,0 +1,34 @@
+body {
+	background-color: #DADADA;
+}
+
+.ui.center.aligned.grid {
+	height: 100%;
+}
+
+.ui.center.grid>.column {
+	max-width: 1000px;
+	align-self: center!important;
+}
+
+.ui[class*="center aligned"].grid .column {
+	text-align: left;
+}
+
+
+.ui.vertical.pointing.menu {
+	width:100%;
+}
+
+.ui.two.column .twelve.wide.column {
+	padding-left: 0.2em;
+}
+
+#game-form {
+	width: 100%;
+	display: none;
+}
+
+.ui.tab.segment.active {
+	margin-top:0;
+}
